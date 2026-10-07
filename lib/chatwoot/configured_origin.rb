@@ -9,9 +9,7 @@ class Chatwoot::ConfiguredOrigin
       return if value.blank?
 
       uri = URI.parse(value)
-      unless valid_origin?(uri)
-        raise ArgumentError, "#{name} must be an HTTPS origin without a path, credentials, query, or fragment"
-      end
+      raise ArgumentError, "#{name} must be an HTTPS origin without a path, credentials, query, or fragment" unless valid_origin?(uri)
 
       uri.path = ''
       uri
