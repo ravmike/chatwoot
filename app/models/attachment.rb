@@ -84,10 +84,10 @@ class Attachment < ApplicationRecord
 
   private
 
-  def with_external_media_url_options(origin, &block)
+  def with_external_media_url_options(origin, &)
     url_options = { host: origin.host, protocol: origin.scheme }
     url_options[:port] = origin.port unless origin.port == origin.default_port
-    ActiveStorage::Current.set(url_options: url_options, &block)
+    ActiveStorage::Current.set(url_options: url_options, &)
   end
 
   def metadata_for_file_type

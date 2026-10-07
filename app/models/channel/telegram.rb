@@ -95,7 +95,7 @@ class Channel::Telegram < ApplicationRecord
 
   def setup_telegram_webhook
     webhook_origin = Chatwoot::ConfiguredOrigin.from_env('TELEGRAM_WEBHOOK_BASE_URL')
-    if webhook_origin && !TELEGRAM_WEBHOOK_ALLOWED_PORTS.include?(webhook_origin.port)
+    if webhook_origin && TELEGRAM_WEBHOOK_ALLOWED_PORTS.exclude?(webhook_origin.port)
       raise ArgumentError, 'TELEGRAM_WEBHOOK_BASE_URL uses a port unsupported by Telegram'
     end
 

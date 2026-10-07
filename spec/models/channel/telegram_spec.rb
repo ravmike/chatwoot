@@ -10,7 +10,7 @@ RSpec.describe Channel::Telegram do
     before do
       allow(HTTParty).to receive(:post) do |url, options = {}|
         requests << [url, options]
-        double(success?: true)
+        instance_double(HTTParty::Response, success?: true)
       end
     end
 
