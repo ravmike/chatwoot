@@ -1,6 +1,15 @@
 name: Focused external routing validation
 on:
   workflow_dispatch:
+    inputs:
+      spec_files:
+        description: Selected RSpec files
+        default: spec/models/channel/telegram_spec.rb spec/models/attachment_spec.rb spec/lib/chatwoot/configured_origin_spec.rb
+        type: string
+      run_lint:
+        description: Run scoped RuboCop
+        default: true
+        type: boolean
 permissions:
   contents: read
 jobs:
@@ -53,6 +62,9 @@ jobs:
           rm -rf enterprise spec/enterprise
           bundle exec rake db:create db:schema:load
       - name: Focused native RSpec
-        run: bundle exec rspec spec/models/channel/telegram_spec.rb spec/models/attachment_spec.rb spec/lib/chatwoot/configured_origin_spec.rb
+        env:
+          ROUTING_SPEC_FILES: ${{ inputs.spec_files }}
+        run: bundle exec rspec $ROUTING_SPEC_FILES
       - name: RuboCop for changed Ruby files
+        if: always() && inputs.run_lint
         run: bundle exec rubocop app/models/channel/telegram.rb app/models/attachment.rb lib/chatwoot/configured_origin.rb spec/models/channel/telegram_spec.rb spec/models/attachment_spec.rb spec/lib/chatwoot/configured_origin_spec.rb
