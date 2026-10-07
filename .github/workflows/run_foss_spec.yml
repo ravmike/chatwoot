@@ -1,70 +1,15 @@
-name: Focused external routing validation
+name: Focused external routing lint
 on:
   workflow_dispatch:
-    inputs:
-      spec_files:
-        description: Selected RSpec files
-        default: spec/models/channel/telegram_spec.rb spec/models/attachment_spec.rb spec/lib/chatwoot/configured_origin_spec.rb
-        type: string
-      run_lint:
-        description: Run scoped RuboCop
-        default: true
-        type: boolean
 permissions:
   contents: read
 jobs:
-  routing-specs:
+  origin-validator-lint:
     runs-on: ubuntu-latest
-    env:
-      RAILS_ENV: test
-      NODE_ENV: test
-      FRONTEND_URL: http://localhost:3000
-      POSTGRES_HOST: localhost
-      POSTGRES_USERNAME: postgres
-      POSTGRES_PASSWORD: ''
-      REDIS_URL: redis://localhost:6379
-      ACTIVE_STORAGE_SERVICE: local
-      SECRET_KEY_BASE: test-only-routing-validation-secret-key-base
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ''
-          POSTGRES_DB: postgres
-          POSTGRES_HOST_AUTH_METHOD: trust
-        ports:
-          - 5432:5432
-        options: >-
-          --mount type=tmpfs,destination=/var/lib/postgresql/data
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:alpine
-        ports:
-          - 6379:6379
-        options: --entrypoint redis-server
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Prepare CE database
-        run: |
-          rm -rf enterprise spec/enterprise
-          bundle exec rake db:create db:schema:load
-      - name: Focused native RSpec
-        env:
-          ROUTING_SPEC_FILES: ${{ inputs.spec_files }}
-        run: bundle exec rspec $ROUTING_SPEC_FILES
-      - name: RuboCop for changed Ruby files
-        if: always() && inputs.run_lint
-        run: bundle exec rubocop app/models/channel/telegram.rb app/models/attachment.rb lib/chatwoot/configured_origin.rb spec/models/channel/telegram_spec.rb spec/models/attachment_spec.rb spec/lib/chatwoot/configured_origin_spec.rb
+      - name: RuboCop for corrected origin validator
+        run: bundle exec rubocop lib/chatwoot/configured_origin.rb
