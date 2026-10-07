@@ -59,7 +59,7 @@ RSpec.describe Attachment do
     end
 
     it 'does not apply the external media origin to file_url' do
-      attachment = message.attachments.new(account_id: message.account_id, file_type: :image)
+      attachment = message.attachments.create!(account_id: message.account_id, file_type: :image)
       attachment.file.attach(io: Rails.root.join('spec/assets/avatar.png').open, filename: 'avatar.png', content_type: 'image/png')
       original_url = attachment.file_url
 
